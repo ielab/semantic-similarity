@@ -7,24 +7,35 @@ from scipy import sparse
 import numpy as np
 
 class Index():
-    def __init__(self, url):
+    def __init__(self, url, fields):
         self.es = Elasticsearch([url])
+        self.res = self.es.search()
+        if fields == None:
+            self.fields = self.getFields()
+        else :
+            self.fields = fields
         self.ids = self.getIds()
         self.createDocuments()
 
     def getIds(self):
-        res = self.es.search()
         ids = []
-        for doc in res.get("hits").get("hits"):
+        for doc in self.res.get("hits").get("hits"):
             ids.append(doc.get("_id"))
         return ids
 
+    def getFields(self):
+        fields = []
+        for doc in self.res.get("hits").get("hits"):
+            for field in doc.get("_source"):
+                if field not in fields:
+                    fields.append(field)
+        return fields
 
     def createDocuments(self):
         self.docs = []
         for doc in self.ids:
-            vector = self.es.termvectors(index="med", doc_type='_doc', id=doc, fields=["abstract"], term_statistics="true")
-            self.docs.append(Document(doc, self.es))
+            vector = self.es.termvectors(index="med", doc_type='_doc', id=doc, fields=self.fields, term_statistics="true")
+            self.docs.append(Document(vector, self.fields))
 
     def getTermVector(self, word):
         vector = []
@@ -36,17 +47,24 @@ class Index():
         return vector
 
 class Document():
-    def __init__(self, doc, es):
-        self.vector = es.termvectors(index="med", doc_type='_doc', id=doc, fields=["abstract"], term_statistics="true")
-        self.sumDocFreq = self.vector.get("term_vectors").get("abstract").get("field_statistics").get("sum_doc_freq")
+    def __init__(self, vector, fields):
+        self.vector = vector
+        self.sumDocFreq = 0
+        for field in fields:
+            if field in self.vector.get("term_vectors"):
+                self.sumDocFreq += self.vector.get("term_vectors").get(field).get("field_statistics").get("sum_doc_freq")
         self.terms = {}
-        self.generateTerms()
+        self.generateTerms(fields)
 
-    def generateTerms(self):
-        allTerms = self.vector.get("term_vectors").get("abstract").get("terms")
-        for name in allTerms:
-            self.terms[name] = Term(name, allTerms[name].get("term_freq"), allTerms[name].get("doc_freq"))
-
+    def generateTerms(self, fields):
+        for field in fields:
+            if field in self.vector.get("term_vectors"):
+                allTerms = self.vector.get("term_vectors").get(field).get("terms")
+                for name in allTerms:
+                    if name not in self.terms:
+                        self.terms[name] = Term(name, allTerms[name].get("term_freq"), allTerms[name].get("doc_freq"))
+                    else:
+                        self.terms[name].update(allTerms[name].get("term_freq"), allTerms[name].get("doc_freq"))
 class Term():
 
     def __init__(self, name, termFreq, docFreq):
@@ -56,6 +74,10 @@ class Term():
 
     def calculateTfidf(self, sumDocFreq):
         return self.termFreq * math.log(sumDocFreq/self.docFreq, 10)
+
+    def update(self, termFreq, docFreq):
+        self.termFreq += termFreq
+        self.docFreq += docFreq
 
 class Similarity(ABC):
 
@@ -98,7 +120,12 @@ class PMI(Similarity):
 def main():
     #link = input("Link to index: ")
     link = "ielab:KVVjnWygjGJRQnYmgAd3CsWV@ielab-pubmed-index.uqcloud.net"
-    index = Index(link + ":80")
+    input_fields = input("Fields to use (space separated):")
+    if input_fields == "":
+        fields = None
+    else:
+        fields = input_fields.split(" ")
+    index = Index(link + ":80", fields)
     s1 = input("String to compare: ")
     s2 = input("Compare with: ")
     methods = {"1": DocCos, "2": PMI}
