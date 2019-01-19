@@ -2,6 +2,10 @@ from abc import ABC, abstractmethod
 from scipy import spatial
 from elasticsearch import Elasticsearch
 import math
+from sklearn.metrics.pairwise import cosine_similarity
+from scipy import sparse
+import numpy as np
+
 class Index():
     def __init__(self, url):
         self.es = Elasticsearch([url])
@@ -61,7 +65,7 @@ class Similarity(ABC):
         self.s1 = s1
         self.s2 = s2
         self.index = index
-        
+
     @abstractmethod
     def calculateSimilarity(self):
         pass
@@ -76,10 +80,12 @@ class DocCos(Similarity):
         self.calculateSimilarity()
 
     def calculateSimilarity(self):
-        self.similarity = 1 - spatial.distance.cosine(self.v1, self.v2)
+        array = np.array([self.v1, self.v2])
+        array_sparse = sparse.csr_matrix(array)
+        self.similarity = cosine_similarity(array_sparse)
 
     def getSimilarity(self):
-        return self.similarity
+        return self.similarity[0][1]
 
 class PMI(Similarity):
     def __init__(self, s1, s2, index):
@@ -90,10 +96,17 @@ class PMI(Similarity):
 
 
 def main():
-    index = Index("ielab:KVVjnWygjGJRQnYmgAd3CsWV@ielab-pubmed-index.uqcloud.net:80")
-    Cos = DocCos("the", "antiaggressive", index)
-    print(Cos.getSimilarity())
-
+    #link = input("Link to index: ")
+    link = "ielab:KVVjnWygjGJRQnYmgAd3CsWV@ielab-pubmed-index.uqcloud.net"
+    index = Index(link + ":80")
+    s1 = input("String to compare: ")
+    s2 = input("Compare with: ")
+    methods = {"1": DocCos, "2": PMI}
+    print("Comparison Methods:")
+    for key, value in methods.items():
+        print(key + ": " + value.__name__)
+    method = input()
+    print(methods.get(method)(s1, s2, index).getSimilarity())
 
 if __name__ == "__main__" :
     main()
