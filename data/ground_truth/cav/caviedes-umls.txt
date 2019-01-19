@@ -1,0 +1,45 @@
+Angina Pectoris	C0002962	Coronary Disease	C0010068	1.53000000	1.53000000
+Arrhythmia	C0003811	Heart Diseases	C0018799	1.83000000	1.83000000
+Cardiomyopathy, Alcoholic	C0007192	Heart Diseases	C0018799	1.83000000	1.83000000
+Coronary Disease	C0010068	Heart Diseases	C0018799	1.83000000	1.83000000
+Heart Diseases	C0018799	Heart Failure, Congestive	C0018802	1.83000000	1.83000000
+Angina Pectoris	C0002962	Heart Diseases	C0018799	2.83000000	2.83000000
+Heartburn	C0018834	Abdominal pain	C0000737	2.83000000	2.83000000
+Coronary Disease	C0010068	Heart Failure, Congestive	C0018802	3.03000000	3.03000000
+Cardiomyopathy, Alcoholic	C0007192	Heart Failure, Congestive	C0018802	3.16000000	3.16000000
+Arrhythmia	C0003811	Heart Failure, Congestive	C0018802	3.33000000	3.33000000
+Arrhythmia	C0003811	Cardiomyopathy, Alcoholic	C0007192	3.50000000	3.50000000
+Arrhythmia	C0003811	Coronary Disease	C0010068	3.70000000	3.70000000
+Angina Pectoris	C0002962	Arrhythmia	C0003811	4.00000000	4.00000000
+Angina Pectoris	C0002962	Heart Failure, Congestive	C0018802	4.00000000	4.00000000
+Arrhythmia	C0003811	Hypokalemia	C0020621	4.16000000	4.16000000
+Angina Pectoris	C0002962	Cardiomyopathy, Alcoholic	C0007192	4.33000000	4.33000000
+Cardiomyopathy, Alcoholic	C0007192	Coronary Disease	C0010068	4.33000000	4.33000000
+Heart Failure, Congestive	C0018802	Hypokalemia	C0020621	5.33000000	5.33000000
+Angina Pectoris	C0002962	Heartburn	C0018834	5.66000000	5.66000000
+Heart Diseases	C0018799	Heartburn	C0018834	6.33000000	6.33000000
+Abdominal pain	C0000737	Respiratory System Abnormalities	C0035238	6.66000000	6.66000000
+Cardiomyopathy, Alcoholic	C0007192	Heartburn	C0018834	6.66000000	6.66000000
+Coronary Disease	C0010068	Heartburn	C0018834	6.66000000	6.66000000
+Heart Diseases	C0018799	Hypokalemia	C0020621	6.66000000	6.66000000
+Heartburn	C0018834	Heart Failure, Congestive	C0018802	6.66000000	6.66000000
+Angina Pectoris	C0002962	Hypokalemia	C0020621	7.00000000	7.00000000
+Coronary Disease	C0010068	Hypokalemia	C0020621	7.00000000	7.00000000
+Heart Failure, Congestive	C0018802	Abdominal pain	C0000737	7.00000000	7.00000000
+Angina Pectoris	C0002962	Abdominal pain	C0000737	7.33000000	7.33000000
+Arrhythmia	C0003811	Heartburn	C0018834	7.33000000	7.33000000
+Cardiomyopathy, Alcoholic	C0007192	Abdominal pain	C0000737	7.33000000	7.33000000
+Cardiomyopathy, Alcoholic	C0007192	Hypokalemia	C0020621	7.33000000	7.33000000
+Coronary Disease	C0010068	Abdominal pain	C0000737	7.33000000	7.33000000
+Cardiomyopathy, Alcoholic	C0007192	Respiratory System Abnormalities	C0035238	7.66000000	7.66000000
+Heart Diseases	C0018799	Abdominal pain	C0000737	7.66000000	7.66000000
+Heart Diseases	C0018799	Respiratory System Abnormalities	C0035238	7.66000000	7.66000000
+Heart Failure, Congestive	C0018802	Respiratory System Abnormalities	C0035238	7.66000000	7.66000000
+Heartburn	C0018834	Respiratory System Abnormalities	C0035238	7.66000000	7.66000000
+Heartburn	C0018834	Hypokalemia	C0020621	7.66000000	7.66000000
+Abdominal pain	C0000737	Hypokalemia	C0020621	8.00000000	8.00000000
+Arrhythmia	C0003811	Abdominal pain	C0000737	8.33000000	8.33000000
+Angina Pectoris	C0002962	Respiratory System Abnormalities	C0035238	8.66000000	8.66000000
+Arrhythmia	C0003811	Respiratory System Abnormalities	C0035238	8.66000000	8.66000000
+Coronary Disease	C0010068	Respiratory System Abnormalities	C0035238	8.66000000	8.66000000
+Hypokalemia	C0020621	Respiratory System Abnormalities	C0035238	8.66000000	8.66000000

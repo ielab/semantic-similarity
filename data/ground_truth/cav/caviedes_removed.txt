@@ -1,0 +1,10 @@
+Abdominal pain	C0000737	Passive-Aggressive Personality Disorder	C0030631	7.66000000
+Heartburn	C0018834	Passive-Aggressive Personality Disorder	C0030631	7.66000000
+Angina Pectoris	C0002962	Passive-Aggressive Personality Disorder	C0030631	9.33000000
+Arrhythmia	C0003811	Passive-Aggressive Personality Disorder	C0030631	9.33000000
+Cardiomyopathy, Alcoholic	C0007192	Passive-Aggressive Personality Disorder	C0030631	9.33000000
+Coronary Disease	C0010068	Passive-Aggressive Personality Disorder	C0030631	9.33000000
+Heart Diseases	C0018799	Passive-Aggressive Personality Disorder	C0030631	9.33000000
+Heart Failure, Congestive	C0018801	Passive-Aggressive Personality Disorder	C0030631	9.33000000
+Hypokalemia	C0020621	Passive-Aggressive Personality Disorder	C0030631	9.33000000
+Passive-Aggressive Personality Disorder	C0030631	Respiratory System Abnormalities	C0035238	9.33000000

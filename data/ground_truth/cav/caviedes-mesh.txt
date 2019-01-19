@@ -1,0 +1,55 @@
+Angina Pectoris	D000787	Coronary Disease	D003327	1.53000000
+Arrhythmia	D001145	Heart Diseases	D006331	1.83000000
+Cardiomyopathy, Alcoholic	D002310	Heart Diseases	D006331	1.83000000
+Coronary Disease	D003327	Heart Diseases	D006331	1.83000000
+Heart Diseases	D006331	Heart Failure, Congestive	D006333	1.83000000
+Angina Pectoris	D000787	Heart Diseases	D006331	2.83000000
+Heartburn	D006356	Abdominal pain	D015746	2.83000000
+Coronary Disease	D003327	Heart Failure, Congestive	D006333	3.03000000
+Cardiomyopathy, Alcoholic	D002310	Heart Failure, Congestive	D006333	3.16000000
+Arrhythmia	D001145	Heart Failure, Congestive	D006333	3.33000000
+Arrhythmia	D001145	Cardiomyopathy, Alcoholic	D002310	3.50000000
+Arrhythmia	D001145	Coronary Disease	D003327	3.70000000
+Angina Pectoris	D000787	Arrhythmia	D001145	4.00000000
+Angina Pectoris	D000787	Heart Failure, Congestive	D006333	4.00000000
+Arrhythmia	D001145	Hypokalemia	D007008	4.16000000
+Angina Pectoris	D000787	Cardiomyopathy, Alcoholic	D002310	4.33000000
+Cardiomyopathy, Alcoholic	D002310	Coronary Disease	D003327	4.33000000
+Heart Failure, Congestive	D006333	Hypokalemia	D007008	5.33000000
+Angina Pectoris	D000787	Heartburn	D006356	5.66000000
+Heart Diseases	D006331	Heartburn	D006356	6.33000000
+Abdominal pain	D015746	Respiratory System Abnormalities	D015619	6.66000000
+Cardiomyopathy, Alcoholic	D002310	Heartburn	D006356	6.66000000
+Coronary Disease	D003327	Heartburn	D006356	6.66000000
+Heart Diseases	D006331	Hypokalemia	D007008	6.66000000
+Heartburn	D006356	Heart Failure, Congestive	D006333	6.66000000
+Angina Pectoris	D000787	Hypokalemia	D007008	7.00000000
+Coronary Disease	D003327	Hypokalemia	D007008	7.00000000
+Heart Failure, Congestive	D006333	Abdominal pain	D015746	7.00000000
+Angina Pectoris	D000787	Abdominal pain	D015746	7.33000000
+Arrhythmia	D001145	Heartburn	D006356	7.33000000
+Cardiomyopathy, Alcoholic	D002310	Abdominal pain	D015746	7.33000000
+Cardiomyopathy, Alcoholic	D002310	Hypokalemia	D007008	7.33000000
+Coronary Disease	D003327	Abdominal pain	D015746	7.33000000
+Abdominal pain	D015746	Passive-Aggressive Personality Disorder	D010324	7.66000000
+Cardiomyopathy, Alcoholic	D002310	Respiratory System Abnormalities	D015619	7.66000000
+Heart Diseases	D006331	Abdominal pain	D015746	7.66000000
+Heart Diseases	D006331	Respiratory System Abnormalities	D015619	7.66000000
+Heart Failure, Congestive	D006333	Respiratory System Abnormalities	D015619	7.66000000
+Heartburn	D006356	Respiratory System Abnormalities	D015619	7.66000000
+Heartburn	D006356	Hypokalemia	D007008	7.66000000
+Heartburn	D006356	Passive-Aggressive Personality Disorder	D010324	7.66000000
+Abdominal pain	D015746	Hypokalemia	D007008	8.00000000
+Arrhythmia	D001145	Abdominal pain	D015746	8.33000000
+Angina Pectoris	D000787	Respiratory System Abnormalities	D015619	8.66000000
+Arrhythmia	D001145	Respiratory System Abnormalities	D015619	8.66000000
+Coronary Disease	D003327	Respiratory System Abnormalities	D015619	8.66000000
+Hypokalemia	D007008	Respiratory System Abnormalities	D015619	8.66000000
+Angina Pectoris	D000787	Passive-Aggressive Personality Disorder	D010324	9.33000000
+Arrhythmia	D001145	Passive-Aggressive Personality Disorder	D010324	9.33000000
+Cardiomyopathy, Alcoholic	D002310	Passive-Aggressive Personality Disorder	D010324	9.33000000
+Coronary Disease	D003327	Passive-Aggressive Personality Disorder	D010324	9.33000000
+Heart Diseases	D006331	Passive-Aggressive Personality Disorder	D010324	9.33000000
+Heart Failure, Congestive	D006333	Passive-Aggressive Personality Disorder	D010324	9.33000000
+Hypokalemia	D007008	Passive-Aggressive Personality Disorder	D010324	9.33000000
+Passive-Aggressive Personality Disorder	D010324	Respiratory System Abnormalities	D015619	9.33000000

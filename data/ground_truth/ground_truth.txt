@@ -1,0 +1,28 @@
+Renal failure	C0035078	Kidney failure	C0035078	4.0	4.0
+Heart	C0018787	Myocardium Infarction	C0027051	3.3	3.0
+Stroke	C0038454	Infact	C0021308	3.0	2.8
+Abortion	C0156543	Miscarriage	C0000786	3.0	3.3
+Delusion	C0011253	Schizophrenia	C0036341	3.0	2.2
+Congestive heart failure	C0018802	Pulmonary edema	C0034063	3.0	1.4
+Metastasis	C0027627	Adenocarcinoma	C0001418	2.7	1.8
+Calcification	C0175895	Stenosis	C0009814	2.7	2.0
+Diarrhea	C0011991	Stomach cramps	C0344375	2.3	1.3
+Mitral stenosis	C0026269	Atrial fibrillation	C0004238	2.3	1.3
+Rheumatoid arthritis	C0003873	Lupus	C0409974	2.0	1.1
+Brain tumor	C0006118	Intracranial hemorrhage	C0151699	2.0	1.3
+Carpel tunnel syndrome	C0007286	Osteoarthritis	C0029408	2.0	1.1
+Diabetes mellitus	C0011849	Hypertension	C0020538	2.0	1.0
+Acne	C0702166	Syringe	C0039142	2.0	1.0
+Antibiotic	C0003232	Allergy	C0020517	1.7	1.2
+Cortisone	C0010137	Total knee replacement	C0086511	1.7	1.0
+Pulmonary embolus	C0034065	Myocardial infarction	C0027051	1.7	1.2
+Pulmonary fibrosis	C0034069	Lung cancer	C0242379	1.7	1.4
+Cholangiocarcinoma	C0206698	Colonoscopy	C0009378	1.3	1.0
+Multiple sclerosis	C0026769	Psychosis	C0033975	1.0	1.0
+Appendicitis	C0003615	Osteoporosis	C0029456	1.0	1.0
+Rectal polyp	C0034887	Aorta	C0003483	1.0	1.0
+Xerostomia	C0043352	Alcoholic cirrhosis	C0023891	1.0	1.0
+Peptic ulcer disease	C0030920	Myopia	C0027092	1.0	1.0
+Depression	C0011581	Cellulites	C0007642	1.0	1.0
+Varicose vein	C0042345	Entire knee meniscus	C0224701	1.0	1.0
+Hyperlidpidemia	C0020473	Metastasis	C0027627	1.0	1.0
