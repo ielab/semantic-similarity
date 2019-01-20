@@ -35,7 +35,7 @@ class Index():
         self.docs = []
         for doc in self.ids:
             vector = self.es.termvectors(index="med", doc_type='_doc', id=doc, fields=self.fields, term_statistics="true")
-            self.docs.append(Document(vector, self.fields))
+            self.docs.append(Document(vector, self.fields, doc))
 
     def getTermVector(self, word):
         vector = []
@@ -47,8 +47,9 @@ class Index():
         return vector
 
 class Document():
-    def __init__(self, vector, fields):
+    def __init__(self, vector, fields, doc):
         self.vector = vector
+        self.id = doc
         self.sumDocFreq = 0
         for field in fields:
             if field in self.vector.get("term_vectors"):
@@ -65,6 +66,10 @@ class Document():
                         self.terms[name] = Term(name, allTerms[name].get("term_freq"), allTerms[name].get("doc_freq"))
                     else:
                         self.terms[name].update(allTerms[name].get("term_freq"), allTerms[name].get("doc_freq"))
+
+    def getTerms(self):
+        return self.terms
+
 class Term():
 
     def __init__(self, name, termFreq, docFreq):
@@ -112,11 +117,31 @@ class DocCos(Similarity):
 class PMI(Similarity):
     def __init__(self, s1, s2, index):
         super().__init__(s1, s2, index)
+        self.calculateSimilarity()
 
     def calculateSimilarity(self):
-        print("+PMI!")
+        d1 = self.getDocumentFrequency(self.s1)
+        d2 = self.getDocumentFrequency(self.s2)
+        d12 = self.getMutualDocuments(d1, d2)
+        D = len(self.index.docs)
+        f1 = len(d1)
+        f2 = len(d2)
+        f12 = len(d12)
+        #self.similarity = max(0, math.log(f12 / (f1 * (f2 / D) + (math.sqrt(f1 * 0.23)))))
+        self.similarity = math.log(f12 / (f1 * (f2 / D) + (math.sqrt(f1 * 0.23))))
 
+    def getDocumentFrequency(self, word):
+        docs = []
+        for doc in self.index.docs:
+            if word in doc.getTerms():
+                docs.append(doc.id)
+        return docs
 
+    def getMutualDocuments(self, d1, d2):
+        return list(set(d1).intersection(d2))
+
+    def getSimilarity(self):
+        return self.similarity
 def main():
     #link = input("Link to index: ")
     link = "ielab:KVVjnWygjGJRQnYmgAd3CsWV@ielab-pubmed-index.uqcloud.net"
