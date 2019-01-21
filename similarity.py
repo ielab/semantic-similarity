@@ -34,7 +34,8 @@ class Index():
     def createDocuments(self):
         self.docs = []
         for doc in self.ids:
-            vector = self.es.termvectors(index="med", doc_type='_doc', id=doc, fields=self.fields, term_statistics="true")
+            vector = self.es.termvectors(index="med", doc_type='_doc', id=doc, fields=self.fields, term_statistics="true",
+                    offsets = 'false', payloads = 'false', positions = 'false')
             self.docs.append(Document(vector, self.fields, doc))
 
     def getTermVector(self, word):
@@ -84,6 +85,12 @@ class Term():
         self.termFreq += termFreq
         self.docFreq += docFreq
 
+    def __eq__(self, other):
+        """Overrides the default implementation"""
+        if isinstance(other, Term):
+            return self.name == other.name and self.termFreq == other.termFreq and self.docFreq == other.docFreq
+        return False
+
 class Similarity(ABC):
 
 
@@ -117,6 +124,7 @@ class DocCos(Similarity):
 class PMI(Similarity):
     def __init__(self, s1, s2, index):
         super().__init__(s1, s2, index)
+        self.similarity = 0
         self.calculateSimilarity()
 
     def calculateSimilarity(self):
@@ -127,8 +135,11 @@ class PMI(Similarity):
         f1 = len(d1)
         f2 = len(d2)
         f12 = len(d12)
-        #self.similarity = max(0, math.log(f12 / (f1 * (f2 / D) + (math.sqrt(f1 * 0.23)))))
-        self.similarity = math.log(f12 / (f1 * (f2 / D) + (math.sqrt(f1 * 0.23))))
+        try:
+            self.similarity = max(0, math.log(f12 / (f1 * (f2 / D) + (math.sqrt(f1 * 0.23)))))
+        except:
+            print("error: one of the words does not exist in index")
+        #self.similarity = math.log(f12 / (f1 * (f2 / D) + (math.sqrt(f1 * 0.23))))
 
     def getDocumentFrequency(self, word):
         docs = []
