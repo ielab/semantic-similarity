@@ -136,7 +136,7 @@ class PMI(Similarity):
         f2 = len(d2)
         f12 = len(d12)
         try:
-            self.similarity = max(0, math.log(f12 / (f1 * (f2 / D) + (math.sqrt(f1 * 0.23)))))
+            self.similarity = max(0, math.log((f12 * D )/ (f1 * f2), 2))
         except:
             print("error: one of the words does not exist in index")
         #self.similarity = math.log(f12 / (f1 * (f2 / D) + (math.sqrt(f1 * 0.23))))

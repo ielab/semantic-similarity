@@ -182,7 +182,8 @@ class TestPMI(unittest.TestCase):
                                              'neuroleptic': {'doc_freq': 17, 'ttf': 18, 'term_freq': 1},
                                              'agents': {'doc_freq': 122, 'ttf': 122, 'term_freq': 1},
                                              'of': {'doc_freq': 4358, 'ttf': 6273, 'term_freq': 1},
-                                             'pharmacological': {'doc_freq': 20, 'ttf': 20, 'term_freq': 1}}}}}
+                                             'pharmacological': {'doc_freq': 20, 'ttf': 20, 'term_freq': 1},
+                                             'blood': {'doc_freq': 462, 'ttf': 592, 'term_freq': 1},}}}}
         self.vec3 = {'_index': 'med', '_type': '_doc', '_id': '25', '_version': 1, 'found': True, 'took': 1,
                      'term_vectors': {
                          'title': {'field_statistics': {'sum_doc_freq': 66088, 'doc_count': 5934, 'sum_ttf': 70822},
@@ -221,9 +222,9 @@ class TestPMI(unittest.TestCase):
         docs = [Document(self.vec, ['title', 'mesh_headings'], 25), Document(self.vec2, ['title'], 12),
                 Document(self.vec3, ['title', 'mesh_headings'], 11), Document(self.vec4, ['title', 'mesh_headings'], 14), Document(self.vec5, ['title', 'mesh_headings'], 31)]
         index.docs = docs
-        sim = PMI('blood', 'agents', index)
+        sim = PMI('blood', 'contraction', index)
         self.assertAlmostEqual(sim.getSimilarity(), 0)
         sim = PMI('chlordiazepoxide', 'chlorpromazine', index)
-        self.assertAlmostEqual(sim.getSimilarity(), 0.302299726133)
+        self.assertAlmostEqual(sim.getSimilarity(), 1.3219280948873)
 if __name__ == '__main__':
     unittest.main()
