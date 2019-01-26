@@ -1,26 +1,27 @@
 from abc import ABC, abstractmethod
 from scipy import spatial
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch,helpers
 import math
 from sklearn.metrics.pairwise import cosine_similarity
 from scipy import sparse
 import numpy as np
 
 class Index():
-    def __init__(self, url, fields):
+    def __init__(self, url, fields, ids = None):
         self.es = Elasticsearch([url])
         self.res = self.es.search()
+        self.fields = fields
         if fields == None:
-            self.fields = self.getFields()
-        else :
-            self.fields = fields
+            self.fields = ['*']
         self.ids = self.getIds()
+        self.docs = []
         self.createDocuments()
 
     def getIds(self):
+        matches = helpers.scan(self.es, query={"query": {"match_all": {}}}, scroll='1m', index="med")  # like others so far
         ids = []
-        for doc in self.res.get("hits").get("hits"):
-            ids.append(doc.get("_id"))
+        for match in matches:
+            ids.append(match['_id'])
         return ids
 
     def getFields(self):
@@ -32,10 +33,11 @@ class Index():
         return fields
 
     def createDocuments(self):
-        self.docs = []
+        c = 0
         for doc in self.ids:
             vector = self.es.termvectors(index="med", doc_type='_doc', id=doc, fields=self.fields, term_statistics="true",
-                    offsets = 'false', payloads = 'false', positions = 'false')
+                    offsets = 'false', payloads = 'false')
+            c = c + 1
             self.docs.append(Document(vector, self.fields, doc))
 
     def getTermVector(self, word):
@@ -64,27 +66,28 @@ class Document():
                 allTerms = self.vector.get("term_vectors").get(field).get("terms")
                 for name in allTerms:
                     if name not in self.terms:
-                        self.terms[name] = Term(name, allTerms[name].get("term_freq"), allTerms[name].get("doc_freq"))
+                        self.terms[name] = Term(name, allTerms[name].get("term_freq"), allTerms[name].get("doc_freq"), allTerms[name].get("tokens"), field)
                     else:
-                        self.terms[name].update(allTerms[name].get("term_freq"), allTerms[name].get("doc_freq"))
+                        self.terms[name].update(allTerms[name].get("term_freq"), allTerms[name].get("doc_freq"), allTerms[name].get("tokens"), field)
 
     def getTerms(self):
         return self.terms
 
 class Term():
 
-    def __init__(self, name, termFreq, docFreq):
+    def __init__(self, name, termFreq, docFreq, tokens, field):
         self.name = name
         self.termFreq = termFreq
         self.docFreq = docFreq
+        self.positions = {field: tokens}
 
     def calculateTfidf(self, sumDocFreq):
         return self.termFreq * math.log(sumDocFreq/self.docFreq, 10)
 
-    def update(self, termFreq, docFreq):
+    def update(self, termFreq, docFreq, tokens, field):
         self.termFreq += termFreq
         self.docFreq += docFreq
-
+        self.positions[field] = tokens
     def __eq__(self, other):
         """Overrides the default implementation"""
         if isinstance(other, Term):
@@ -122,7 +125,7 @@ class DocCos(Similarity):
         return self.similarity[0][1]
 
 class PMI(Similarity):
-    def __init__(self, s1, s2, index):
+    def __init__(self, s1, s2, index, radius = 0):
         super().__init__(s1, s2, index)
         self.similarity = 0
         self.calculateSimilarity()
@@ -140,6 +143,16 @@ class PMI(Similarity):
         except:
             print("error: one of the words does not exist in index")
         #self.similarity = math.log(f12 / (f1 * (f2 / D) + (math.sqrt(f1 * 0.23))))
+    def calculateSimilarityRange(self):
+        pass
+
+    def getTermFrequency(self, word):
+        count = 0
+        for doc in self.index.docs:
+            if word in doc.getTerms:
+                for positions in doc.getTerms.get(word).positions.values():
+                    count += len(positions)
+        return count
 
     def getDocumentFrequency(self, word):
         docs = []
