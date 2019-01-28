@@ -18,10 +18,14 @@ class Index():
         self.createDocuments()
 
     def getIds(self):
-        matches = helpers.scan(self.es, query={"query": {"match_all": {}}}, scroll='1m', index="med")  # like others so far
+        matches = helpers.scan(self.es, query={"query": {"match_all": {}}}, scroll='1m', index="med")
         ids = []
+        i = 0
         for match in matches:
             ids.append(match['_id'])
+            i += 1
+            if i == 100:
+                break
         return ids
 
     def getFields(self):
@@ -33,60 +37,57 @@ class Index():
         return fields
 
     def createDocuments(self):
-        c = 0
-        for doc in self.ids:
-            vector = self.es.termvectors(index="med", doc_type='_doc', id=doc, fields=self.fields, term_statistics="true",
-                    offsets = 'false', payloads = 'false')
-            c = c + 1
-            self.docs.append(Document(vector, self.fields, doc))
+        print("start")
+        vectors = self.es.mtermvectors(index='med', doc_type='_doc',
+                            body=dict(ids=self.ids, parameters=dict(offsets = 'false', payloads = 'false', fields=self.fields)))
+        print("fdsadf")
+        for doc in vectors['docs']:
+            self.docs.append(Document(doc, self.fields))
 
     def getTermVector(self, word):
         vector = []
+        docCount = 0
         for doc in self.docs:
             if word in doc.terms:
-                vector.append(doc.terms.get(word).calculateTfidf(doc.sumDocFreq))
+                docCount += 1
+        for doc in self.docs:
+            if word in doc.terms:
+                vector.append(doc.terms.get(word).calculateTfidf(len(self.docs), docCount))
             else:
                 vector.append(0)
         return vector
 
 class Document():
-    def __init__(self, vector, fields, doc):
+    def __init__(self, vector, fields):
         self.vector = vector
-        self.id = doc
-        self.sumDocFreq = 0
-        for field in fields:
-            if field in self.vector.get("term_vectors"):
-                self.sumDocFreq += self.vector.get("term_vectors").get(field).get("field_statistics").get("sum_doc_freq")
+        self.id = vector.get('_id')
         self.terms = {}
         self.generateTerms(fields)
 
     def generateTerms(self, fields):
-        for field in fields:
-            if field in self.vector.get("term_vectors"):
-                allTerms = self.vector.get("term_vectors").get(field).get("terms")
-                for name in allTerms:
-                    if name not in self.terms:
-                        self.terms[name] = Term(name, allTerms[name].get("term_freq"), allTerms[name].get("doc_freq"), allTerms[name].get("tokens"), field)
-                    else:
-                        self.terms[name].update(allTerms[name].get("term_freq"), allTerms[name].get("doc_freq"), allTerms[name].get("tokens"), field)
+        for field in self.vector.get("term_vectors"):
+            allTerms = self.vector.get("term_vectors").get(field).get("terms")
+            for name in allTerms:
+                if name not in self.terms:
+                    self.terms[name] = Term(name, allTerms[name].get("term_freq"), allTerms[name].get("tokens"), field)
+                else:
+                    self.terms[name].update(allTerms[name].get("term_freq"), allTerms[name].get("tokens"), field)
 
     def getTerms(self):
         return self.terms
 
 class Term():
 
-    def __init__(self, name, termFreq, docFreq, tokens, field):
+    def __init__(self, name, termFreq, tokens, field):
         self.name = name
         self.termFreq = termFreq
-        self.docFreq = docFreq
         self.positions = {field: tokens}
 
-    def calculateTfidf(self, sumDocFreq):
-        return self.termFreq * math.log(sumDocFreq/self.docFreq, 10)
+    def calculateTfidf(self, sumDocFreq, docCount):
+        return self.termFreq * math.log(sumDocFreq/docCount, 10)
 
-    def update(self, termFreq, docFreq, tokens, field):
+    def update(self, termFreq, tokens, field):
         self.termFreq += termFreq
-        self.docFreq += docFreq
         self.positions[field] = tokens
     def __eq__(self, other):
         """Overrides the default implementation"""
@@ -125,10 +126,15 @@ class DocCos(Similarity):
         return self.similarity[0][1]
 
 class PMI(Similarity):
-    def __init__(self, s1, s2, index, radius = 0):
+    def __init__(self, s1, s2, index, radius):
         super().__init__(s1, s2, index)
         self.similarity = 0
-        self.calculateSimilarity()
+        if radius == '':
+            self.calculateSimilarity()
+        else:
+            self.radius = int(radius)
+            self.calculateSimilarityRange()
+
 
     def calculateSimilarity(self):
         d1 = self.getDocumentFrequency(self.s1)
@@ -143,15 +149,44 @@ class PMI(Similarity):
         except:
             print("error: one of the words does not exist in index")
         #self.similarity = math.log(f12 / (f1 * (f2 / D) + (math.sqrt(f1 * 0.23))))
+
     def calculateSimilarityRange(self):
-        pass
+        f1 = self.getTermFrequency(self.s1)
+        f2 = self.getTermFrequency(self.s2)
+        D = self.getSumFrequency()
+        f12 = self.getMutualFrequency(self.s1, self.s2)
+        print(f1, f2, D, f12)
+        try:
+            self.similarity = max(0, math.log((f12 * D )/ (f1 * f2), 2))
+        except:
+            print("error: one of the words does not exist in index")
+    def getSumFrequency(self):
+        count = 0
+        for doc in self.index.docs:
+            for term in doc.terms.values():
+                count += term.termFreq
+        return count
 
     def getTermFrequency(self, word):
         count = 0
         for doc in self.index.docs:
-            if word in doc.getTerms:
-                for positions in doc.getTerms.get(word).positions.values():
+            if word in doc.terms:
+                for positions in doc.terms[word].positions.values():
                     count += len(positions)
+        return count
+    def getMutualFrequency(self, s1, s2):
+        count = 0
+        for doc in self.index.docs:
+            if s1 in doc.terms:
+                for field in doc.terms.get(s1).positions:
+                    for position1 in doc.terms.get(s1).positions[field]:
+                        if s2 in doc.terms and field in doc.terms.get(s2).positions:
+                            for position2 in doc.terms.get(s2).positions[field]:
+                                print(position2['position'], position1['position'])
+                                if position2['position'] > position1['position'] - self.radius \
+                                        and position2['position'] < position1['position'] + self.radius:
+                                    count = count + 1
+                                    break
         return count
 
     def getDocumentFrequency(self, word):
@@ -169,7 +204,7 @@ class PMI(Similarity):
 def main():
     #link = input("Link to index: ")
     link = "ielab:KVVjnWygjGJRQnYmgAd3CsWV@ielab-pubmed-index.uqcloud.net"
-    input_fields = input("Fields to use (space separated):")
+    input_fields = input("Fields to use (space separated): ")
     if input_fields == "":
         fields = None
     else:
@@ -182,7 +217,9 @@ def main():
     for key, value in methods.items():
         print(key + ": " + value.__name__)
     method = input()
-    print(methods.get(method)(s1, s2, index).getSimilarity())
+    if method == '2':
+        radius = input("Radius? (press enter for whole doc)")
+    print(methods.get(method)(s1, s2, index, radius).getSimilarity())
 
 if __name__ == "__main__" :
     main()
