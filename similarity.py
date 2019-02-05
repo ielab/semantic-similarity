@@ -1,10 +1,14 @@
 from abc import ABC, abstractmethod
+import numpy as np
 from scipy import spatial
 from elasticsearch import Elasticsearch,helpers
 import math
-from sklearn.metrics.pairwise import cosine_similarity
+#from sklearn.metrics.pairwise import cosine_similarity
 from scipy import sparse
-import numpy as np
+from gensim.test.utils import datapath
+from gensim.models import Word2Vec
+from gensim.models import KeyedVectors
+
 
 class Index():
     """An index of the documents used. Stores information about documents and terms"""
@@ -50,10 +54,8 @@ class Index():
 
     def createDocuments(selfc):
         """Generates all documents in the index"""
-        print("start")
         vectors = self.es.mtermvectors(index='med', doc_type='_doc',
                             body=dict(ids=self.ids, parameters=dict(offsets = 'false', payloads = 'false', fields=self.fields)))
-        print("fdsadf")
         for doc in vectors['docs']:
             self.docs.append(Document(doc, self.fields))
 
@@ -136,12 +138,16 @@ class Term():
         if isinstance(other, Term):
             return self.name == other.name and self.termFreq == other.termFreq and self.docFreq == other.docFreq
         return False
+class WordVector():
+    def __init__(self, file):
+        self.wv = KeyedVectors.load_word2vec_format(datapath(file), binary=True)
+
 
 class Similarity(ABC):
     """Abstract class for calculating similarity"""
 
     @abstractmethod
-    def __init__(self, s1, s2, index):
+    def __init__(self, s1, s2):
         """
         constructs a similarity method
         :param s1: the first string to compare
@@ -150,7 +156,6 @@ class Similarity(ABC):
         """
         self.s1 = s1
         self.s2 = s2
-        self.index = index
 
     @abstractmethod
     def calculateSimilarity(self):
@@ -162,7 +167,8 @@ class DocCos(Similarity):
     """Document cosine similarity"""
     def __init__(self, s1, s2, index):
         """Constructor for document cosine similarity"""
-        super().__init__(s1, s2, index)
+        super().__init__(s1, s2)
+        self.index = index
         self.v1 = index.getTermVector(s1)
         self.v2 = index.getTermVector(s2)
         self.calculateSimilarity()
@@ -175,13 +181,15 @@ class DocCos(Similarity):
 
     def getSimilarity(self):
         """returns the similarity"""
+
         return self.similarity[0][1]
 
 class PMI(Similarity):
     """Pointwise Mutual Information"""
     def __init__(self, s1, s2, index, radius):
         """Constructor for PMI"""
-        super().__init__(s1, s2, index)
+        super().__init__(s1, s2)
+        self.index = index
         self.similarity = 0
         if radius == '':
             self.calculateSimilarity()
@@ -267,27 +275,43 @@ class PMI(Similarity):
 
     def getSimilarity(self):
         return self.similarity
+class WordEmbedding(Similarity):
+    def __init__(self, s1, s2, wordvector):
+        super().__init__(s1, s2)
+        self.wv = wordvector
+        self.calculateSimilarity()
+    def calculateSimilarity(self):
+        self.similarity = self.wv.wv.similarity(self.s1, self.s2)
+
+    def getSimilarlity(self):
+        return self.similarity
+
 def main():
-    #link = input("Link to index: ")
-    link = "ielab:KVVjnWygjGJRQnYmgAd3CsWV@ielab-pubmed-index.uqcloud.net"
-    input_fields = input("Fields to use (space separated): ")
-    if input_fields == "":
-        fields = None
-    else:
-        fields = input_fields.split(" ")
-    index = Index(link + ":80", fields)
+
     s1 = input("String to compare: ")
     s2 = input("Compare with: ")
-    methods = {"1": DocCos, "2": PMI}
+    methods = {"1": DocCos, "2": PMI, "3": WordEmbedding}
     print("Comparison Methods:")
     for key, value in methods.items():
         print(key + ": " + value.__name__)
     method = input()
+    if method == '1' or method == '2':
+        # link = input("Link to index: ")
+        link = "ielab:KVVjnWygjGJRQnYmgAd3CsWV@ielab-pubmed-index.uqcloud.net"
+        input_fields = input("Fields to use (space separated): ")
+        if input_fields == "":
+            fields = None
+        else:
+            fields = input_fields.split(" ")
+        index = Index(link + ":80", fields)
+    if method == '1':
+        print(methods.get(method)(s1, s2, index).getSimilarity())
     if method == '2':
         radius = input("Radius? (press enter for whole doc)")
         print(methods.get(method)(s1, s2, index, radius).getSimilarity())
-    else:
-        print(methods.get(method)(s1, s2, index).getSimilarity())
+    if method == '3':
+        wv = WordVector("PubMed.bin")
+        print(methods.get(method)(s1, s2, wv).getSimilarlity())
 
 if __name__ == "__main__" :
     main()
