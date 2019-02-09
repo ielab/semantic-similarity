@@ -3,12 +3,13 @@ import numpy as np
 from scipy import spatial
 from elasticsearch import Elasticsearch,helpers
 import math
-#from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.metrics.pairwise import cosine_similarity
 from scipy import sparse
 from gensim.test.utils import datapath
 from gensim.models import Word2Vec
 from gensim.models import KeyedVectors
 from models import *
+
 
 
 class Similarity(ABC):
