@@ -1,16 +1,9 @@
 from abc import ABC, abstractmethod
+
 import numpy as np
-from scipy import spatial
-from elasticsearch import Elasticsearch,helpers
-import math
-from sklearn.metrics.pairwise import cosine_similarity
 from scipy import sparse
-from gensim.test.utils import datapath
-from gensim.models import Word2Vec
-from gensim.models import KeyedVectors
+from sklearn.metrics.pairwise import cosine_similarity
 from models import *
-
-
 
 class Similarity(ABC):
     """Abstract class for calculating similarity"""
@@ -32,30 +25,32 @@ class Similarity(ABC):
         pass
 
 
-class DocCos(Similarity):
+class CosineSimilarity(Similarity):
     """Document cosine similarity"""
-    def __init__(self, s1, s2, index):
+    def __init__(self, s1, s2, collection):
         """Constructor for document cosine similarity"""
         super().__init__(s1, s2)
-        self.index = index
-        self.v1 = index.getTermVector(s1)
-        self.v2 = index.getTermVector(s2)
-        self.calculateSimilarity()
+        self.collection = collection
+        if collection.instanceOf(Index):
+            self.v1 = collection.getTermVector(s1)
+            self.v2 = collection.getTermVector(s2)
+            self.calculateSimilarity()
+        elif collection.instanceOf(Word2Vec):
+            self.similarity = collection.wv.similarity(s1, s2)
 
     def calculateSimilarity(self):
         """calculates the cosine similarity"""
         array = np.array([self.v1, self.v2])
         array_sparse = sparse.csr_matrix(array)
-        self.similarity = cosine_similarity(array_sparse)
+        self.similarity = cosine_similarity(array_sparse)[0][1]
 
     def getSimilarity(self):
         """returns the similarity"""
-
-        return self.similarity[0][1]
+        return self.similarity
 
 class PMI(Similarity):
     """Pointwise Mutual Information"""
-    def __init__(self, s1, s2, index, radius):
+    def __init__(self, s1, s2, index, radius = None):
         """Constructor for PMI"""
         super().__init__(s1, s2)
         self.index = index
@@ -99,6 +94,9 @@ class PMI(Similarity):
 
 class WordEmbedding(Similarity):
     def __init__(self, s1, s2, wordvector):
+        if not wordvector.isinstance(WordVector):
+            print("Please use a word2vec vector instead")
+            return
         super().__init__(s1, s2)
         self.wv = wordvector
         self.calculateSimilarity()

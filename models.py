@@ -1,19 +1,18 @@
-
-import numpy as np
-from scipy import spatial
+from abc import ABC, abstractmethod
 from elasticsearch import Elasticsearch,helpers
 import math
-from scipy import sparse
 from gensim.test.utils import datapath
 from gensim.models import Word2Vec
 from gensim.models import KeyedVectors
+from similarity import *
 
+class Collection(ABC):
+    pass
 
-class Index():
+class Index(Collection):
     """An index of the documents used. Stores information about documents and terms"""
-    def __init__(self, url, fields, ids = None):
+    def __init__(self, url, fields = None, ids = None):
         """Constructs an index
-
         :param url: the url for the Elasticsearch index
         :param fields: list of fields in the documents to be used for comparison
         :param ids: list of ids used for comparison
@@ -51,7 +50,7 @@ class Index():
                     fields.append(field)
         return fields
 
-    def createDocuments(selfc):
+    def createDocuments(self):
         """Generates all documents in the index"""
         vectors = self.es.mtermvectors(index='med', doc_type='_doc',
                             body=dict(ids=self.ids, parameters=dict(offsets = 'false', payloads = 'false', fields=self.fields)))
@@ -75,6 +74,60 @@ class Index():
             else:
                 vector.append(0)
         return vector
+    def getSumFrequency(self):
+        """Returns the total number of words in the index"""
+        count = 0
+        for doc in self.docs:
+            for term in doc.terms.values():
+                count += term.termFreq
+        return count
+
+    def getTermFrequency(self, word):
+        """Returns the number of times the word appears in the index"""
+        count = 0
+        for doc in self.docs:
+            if word in doc.terms:
+                for positions in doc.terms[word].positions.values():
+                    count += len(positions)
+        return count
+    def getMutualFrequency(self, s1, s2):
+        """Returns the number of times s1 and s2 appear together"""
+        count = 0
+        for doc in self.docs:
+            if s1 in doc.terms:
+                for field in doc.terms.get(s1).positions:
+                    for position1 in doc.terms.get(s1).positions[field]:
+                        if s2 in doc.terms and field in doc.terms.get(s2).positions:
+                            for position2 in doc.terms.get(s2).positions[field]:
+                                print(position2['position'], position1['position'])
+                                if position2['position'] > position1['position'] - self.radius \
+                                        and position2['position'] < position1['position'] + self.radius:
+                                    count = count + 1
+                                    break
+        return count
+
+    def getDocumentFrequency(self, word):
+        """Returns a list of documents in which the word appears"""
+        docs = []
+        for doc in self.docs:
+            if word in doc.getTerms():
+                docs.append(doc.id)
+        return docs
+
+    def getMutualDocuments(self, d1, d2):
+        """
+        returns a list of doc ids that are in both d1 and d2
+        :param d1: List containing documents containing the first word
+        :param d2: List containing documents containing the second word
+        :return: list of doc ids that are in both d1 and d2
+        """
+        return list(set(d1).intersection(d2))
+
+    def similarity(self, method, s1, s2, radius = None):
+        if(method == CosineSimilarity):
+            return method(s1, s2, self).getSimilarity()
+        if(method == PMI):
+            return method(s1, s2, self, radius)
 
 class Document():
     """A single document in the index"""
@@ -131,63 +184,20 @@ class Term():
         """updates the statistics for the term if the term already exists"""
         self.termFreq += termFreq
         self.positions[field] = tokens
-    def getSumFrequency(self):
-        """Returns the total number of words in the index"""
-        count = 0
-        for doc in self.docs:
-            for term in doc.terms.values():
-                count += term.termFreq
-        return count
 
-    def getTermFrequency(self, word):
-        """Returns the number of times the word appears in the index"""
-        count = 0
-        for doc in self.docs:
-            if word in doc.terms:
-                for positions in doc.terms[word].positions.values():
-                    count += len(positions)
-        return count
-    def getMutualFrequency(self, s1, s2):
-        """Returns the number of times s1 and s2 appear together"""
-        count = 0
-        for doc in self.docs:
-            if s1 in doc.terms:
-                for field in doc.terms.get(s1).positions:
-                    for position1 in doc.terms.get(s1).positions[field]:
-                        if s2 in doc.terms and field in doc.terms.get(s2).positions:
-                            for position2 in doc.terms.get(s2).positions[field]:
-                                print(position2['position'], position1['position'])
-                                if position2['position'] > position1['position'] - self.radius \
-                                        and position2['position'] < position1['position'] + self.radius:
-                                    count = count + 1
-                                    break
-        return count
-
-    def getDocumentFrequency(self, word):
-        """Returns a list of documents in which the word appears"""
-        docs = []
-        for doc in self.docs:
-            if word in doc.getTerms():
-                docs.append(doc.id)
-        return docs
-
-    def getMutualDocuments(self, d1, d2):
-        """
-        returns a list of doc ids that are in both d1 and d2
-        :param d1: List containing documents containing the first word
-        :param d2: List containing documents containing the second word
-        :return: list of doc ids that are in both d1 and d2
-        """
-        return list(set(d1).intersection(d2))
 
     def __eq__(self, other):
         """Overrides the default implementation"""
         if isinstance(other, Term):
-            return self.name == other.name and self.termFreq == other.termFreq and self.docFreq == other.docFreq
+            return self.name == other.name and self.termFreq == other.termFreq and self.positions == other.positions
         return False
 
 
-class WordVector():
+class WordVector(Collection):
     """A word2vec model of the documents"""
     def __init__(self, file):
         self.wv = KeyedVectors.load_word2vec_format(datapath(file), binary=True)
+
+    def similarity(self, method, s1, s2, radius = None):
+        if(method == CosineSimilarity):
+            return method(s1, s2, self).getSimilarity()
