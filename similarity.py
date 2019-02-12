@@ -92,17 +92,4 @@ class PMI(Similarity):
     def getSimilarity(self):
         return self.similarity
 
-class WordEmbedding(Similarity):
-    def __init__(self, s1, s2, wordvector):
-        if not wordvector.isinstance(WordVector):
-            print("Please use a word2vec vector instead")
-            return
-        super().__init__(s1, s2)
-        self.wv = wordvector
-        self.calculateSimilarity()
-    def calculateSimilarity(self):
-        self.similarity = self.wv.wv.similarity(self.s1, self.s2)
-
-    def getSimilarlity(self):
-        return self.similarity
 
