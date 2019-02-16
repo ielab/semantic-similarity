@@ -27,7 +27,7 @@ class Correlation():
 
     def calculateSpearman(self):
         """calculate spearman coefficient between two vectors"""
-        return spearmanr(self.vector1, self.vector2)
+        return spearmanr(self.vector1, self.vector2)[0]
 
 def main():
     c = Correlation("caviedes_removed.txt", 1, "caviedes_removed.txt", 1)

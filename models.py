@@ -7,7 +7,9 @@ from gensim.models import KeyedVectors
 from similarity import *
 
 class Collection(ABC):
-    pass
+    @abstractmethod
+    def similarity(self, method, s1, s2):
+        pass
 
 class Index(Collection):
     """An index of the documents used. Stores information about documents and terms"""
@@ -90,7 +92,7 @@ class Index(Collection):
                 for positions in doc.terms[word].positions.values():
                     count += len(positions)
         return count
-    def getMutualFrequency(self, s1, s2):
+    def getMutualFrequency(self, s1, s2, radius):
         """Returns the number of times s1 and s2 appear together"""
         count = 0
         for doc in self.docs:
@@ -100,8 +102,8 @@ class Index(Collection):
                         if s2 in doc.terms and field in doc.terms.get(s2).positions:
                             for position2 in doc.terms.get(s2).positions[field]:
                                 print(position2['position'], position1['position'])
-                                if position2['position'] > position1['position'] - self.radius \
-                                        and position2['position'] < position1['position'] + self.radius:
+                                if position2['position'] > position1['position'] - radius \
+                                        and position2['position'] < position1['position'] + radius:
                                     count = count + 1
                                     break
         return count
@@ -123,11 +125,32 @@ class Index(Collection):
         """
         return list(set(d1).intersection(d2))
 
-    def similarity(self, method, s1, s2, radius = None):
-        if(method == CosineSimilarity):
-            return method(s1, s2, self).getSimilarity()
-        if(method == PMI):
-            return method(s1, s2, self, radius)
+    def similarity(self, method, s1, s2):
+        """
+        calculates the similarity of two words in the collection
+        :param method: the similarity method to use
+        :param s1: the first string to compare
+        :param s2: the second string to compare
+        :return: the similarity
+        """
+        if(isinstance(method, VecSim)):
+            return method.calculateSimilarity(self.getTermVector(s1), self.getTermVector(s2))
+        if(isinstance(method, WordSim)):
+            if method.radius == None:
+                d1 = self.getDocumentFrequency(s1)
+                d2 = self.getDocumentFrequency(s2)
+                d12 = self.getMutualDocuments(d1, d2)
+                D = len(self.docs)
+                f1 = len(d1)
+                f2 = len(d2)
+                f12 = len(d12)
+
+            else:
+                f1 = self.getTermFrequency(s1)
+                f2 = self.getTermFrequency(s2)
+                D = self.getSumFrequency()
+                f12 = self.getMutualFrequency(s1, s2, method.radius)
+            return method.calculateSimilarity(D, f1, f2, f12)
 
 class Document():
     """A single document in the index"""
@@ -185,7 +208,6 @@ class Term():
         self.termFreq += termFreq
         self.positions[field] = tokens
 
-
     def __eq__(self, other):
         """Overrides the default implementation"""
         if isinstance(other, Term):
@@ -196,8 +218,16 @@ class Term():
 class WordVector(Collection):
     """A word2vec model of the documents"""
     def __init__(self, file):
+        """creates a word2vec model from a binary file"""
         self.wv = KeyedVectors.load_word2vec_format(datapath(file), binary=True)
 
-    def similarity(self, method, s1, s2, radius = None):
-        if(method == CosineSimilarity):
-            return method(s1, s2, self).getSimilarity()
+    def similarity(self, method, s1, s2):
+        """
+        calculates the similarity of two words in the collection
+        :param method: the similarity method to use
+        :param s1: the first string to compare
+        :param s2: the second string to compare
+        :return: the similarity
+        """
+        if(isinstance(method, VecSim)):
+            return method.calculateSimilarity(self.wv.wv[s1].tolist(), self.wv.wv[s2].tolist())
