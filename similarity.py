@@ -3,7 +3,6 @@ from abc import ABC, abstractmethod
 import numpy as np
 from scipy import sparse
 from sklearn.metrics.pairwise import cosine_similarity
-from models import *
 
 class Similarity(ABC):
     """Abstract class for calculating similarity"""

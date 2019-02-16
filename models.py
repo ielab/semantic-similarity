@@ -4,7 +4,7 @@ import math
 from gensim.test.utils import datapath
 from gensim.models import Word2Vec
 from gensim.models import KeyedVectors
-from similarity import *
+from similarity import VecSim, WordSim, CosineSimilarity, PMI
 
 class Collection(ABC):
     @abstractmethod
@@ -13,14 +13,15 @@ class Collection(ABC):
 
 class Index(Collection):
     """An index of the documents used. Stores information about documents and terms"""
-    def __init__(self, url, fields = None, ids = None):
+    def __init__(self, url = None, fields = None, ids = None):
         """Constructs an index
         :param url: the url for the Elasticsearch index
         :param fields: list of fields in the documents to be used for comparison
         :param ids: list of ids used for comparison
         """
-        self.es = Elasticsearch([url])
-        self.res = self.es.search()
+        if url != None:
+            self.es = Elasticsearch([url])
+            self.res = self.es.search()
         self.fields = fields
         if fields == None:
             self.fields = ['*']
@@ -219,7 +220,7 @@ class WordVector(Collection):
     """A word2vec model of the documents"""
     def __init__(self, file):
         """creates a word2vec model from a binary file"""
-        self.wv = KeyedVectors.load_word2vec_format(datapath(file), binary=True)
+        self.wv = KeyedVectors.load_word2vec_format(file, binary=True)
 
     def similarity(self, method, s1, s2):
         """

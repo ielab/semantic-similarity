@@ -7,7 +7,7 @@ class Correlation():
         constructor for correlation
         :param document1: file with a list of similarity values, one on each line all in the same column
         :param column1: the column number that the similarity values are in. First column is 0
-        :param document2: the second file with list of similarities. Has to be in the same order as documnet1
+        :param document2: the second file with list of similarities. Has to be in the same order as document1
         :param column2: column number for document2
         """
         self.vector1 = self.createVector(document1, column1)
@@ -21,7 +21,7 @@ class Correlation():
             items = line.strip().split("\t")
             vec.append(float(items[column]))
         return vec
-    def calculatePerson(self):
+    def calculatePearson(self):
         """calculates pearson coefficient between two vectors"""
         return pearsonr(self.vector1, self.vector2)
 
@@ -30,9 +30,20 @@ class Correlation():
         return spearmanr(self.vector1, self.vector2)[0]
 
 def main():
-    c = Correlation("caviedes_removed.txt", 1, "caviedes_removed.txt", 1)
-    print(c.calculateSpearman())
-
-
+    print("Evaluation method: ")
+    print("1: Pearson" + "\n" + "2: Spearman")
+    method = input("Enter number corresponding to desired method: ")
+    d1 = input("File with the first list of similarities: ")
+    c1 = input("Column index of similarities to evaluate (index starts at 0): ")
+    d2 = input("File with the second list of similarities: ")
+    c2 = input("Column index of similarities to evaluate (index starts at 0): ")
+    try:
+        correlation = Correlation(d1, c1, d2, c2)
+        if method == "1":
+            print("Correlation" + correlation.calculatePearson())
+        elif method == "2":
+            print("Correlation" + correlation.calculateSpearman())
+    except:
+        print("Something went wrong! Please try again with different files or columns")
 if __name__ == "__main__" :
     main()

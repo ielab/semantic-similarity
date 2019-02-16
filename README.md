@@ -1,19 +1,33 @@
 # semantic-similarity
-This project calculates the semantic similarity using several methods between a pair of words from an ElasticSearch index. 
-Currently there is only Document Cosine Similarity. Other measures such as +PMI and NLP will be added.
+This project calculates the semantic similarity using several methods between a pair of words.
+Elasticsearch indexes are supported with cosine similarity and +PMI and word2vec with cosine similarity.
+It also evaluates the correlation between two sets of similarity measures.
 
 ## usage
-Download the similarity.py file and run the program. It will prompt the user for the link to the index, the words to compare,
-and the comparison method. 
-Some modules may need to be installed before running.
+The program can be used either as a library or run from the terminal.
+
+### library
+Instantiate the collection to be used, either from an elasticsearch index or word2vec binary file.
+Instantiate the similarity class to be used. Pass this into the similarity method of the collection as well as the two strings to compare.
+There is also a fromFile method that can be used to calculate the similarity for each pair of values in a file and writes the result to similarity.txt.
+
+### terminal
+Run main.py. It will prompt for various information, such as the collection and similarity class to use.
+Follow the prompts and type in the information it requires.
+The results will be written to a file the program creates, similarity.txt
+
+### evaluation
+evaluation.py calculates a pearson or spearman correlation between two sets of similarities.
+The two files need to contain the same word pairs in the same order and have one similarity value on each line.
 
 ### requirements
-- An elasticsearch index with the documents to be used must first be created
+- An elasticsearch index or word2vec binary file are needed.
 - The following python modules are needed:
   scipy
   elasticsearch
   sklearn
   numpy
+  gensim
  
 ## testing
-To be added
+Run TestMethods.py.
