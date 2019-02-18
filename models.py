@@ -19,9 +19,13 @@ class Index(Collection):
         :param fields: list of fields in the documents to be used for comparison
         :param ids: list of ids used for comparison
         """
-        if url != None:
+        try:
             self.es = Elasticsearch([url])
             self.res = self.es.search()
+        except:
+            print("Please use another url")
+            return
+
         self.fields = fields
         if fields == None:
             self.fields = ['*']
@@ -31,7 +35,6 @@ class Index(Collection):
             self.ids = ids
         self.docs = []
         self.createDocuments()
-
     def getIds(self):
         """Returns the ids of all documents in the index"""
         matches = helpers.scan(self.es, query={"query": {"match_all": {}}}, scroll='1m', index="med")
@@ -58,7 +61,7 @@ class Index(Collection):
         vectors = self.es.mtermvectors(index='med', doc_type='_doc',
                             body=dict(ids=self.ids, parameters=dict(offsets = 'false', payloads = 'false', fields=self.fields)))
         for doc in vectors['docs']:
-            self.docs.append(Document(doc, self.fields))
+            self.docs.append(Document(doc))
 
     def getTermVector(self, word):
         """
@@ -90,8 +93,7 @@ class Index(Collection):
         count = 0
         for doc in self.docs:
             if word in doc.terms:
-                for positions in doc.terms[word].positions.values():
-                    count += len(positions)
+                count += doc.terms[word].termFreq
         return count
     def getMutualFrequency(self, s1, s2, radius):
         """Returns the number of times s1 and s2 appear together"""
@@ -102,14 +104,12 @@ class Index(Collection):
                     for position1 in doc.terms.get(s1).positions[field]:
                         if s2 in doc.terms and field in doc.terms.get(s2).positions:
                             for position2 in doc.terms.get(s2).positions[field]:
-                                print(position2['position'], position1['position'])
                                 if position2['position'] > position1['position'] - radius \
                                         and position2['position'] < position1['position'] + radius:
                                     count = count + 1
-                                    break
         return count
 
-    def getDocumentFrequency(self, word):
+    def getDocuments(self, word):
         """Returns a list of documents in which the word appears"""
         docs = []
         for doc in self.docs:
@@ -138,8 +138,8 @@ class Index(Collection):
             return method.calculateSimilarity(self.getTermVector(s1), self.getTermVector(s2))
         if(isinstance(method, WordSim)):
             if method.radius == None:
-                d1 = self.getDocumentFrequency(s1)
-                d2 = self.getDocumentFrequency(s2)
+                d1 = self.getDocuments(s1)
+                d2 = self.getDocuments(s2)
                 d12 = self.getMutualDocuments(d1, d2)
                 D = len(self.docs)
                 f1 = len(d1)
@@ -155,7 +155,7 @@ class Index(Collection):
 
 class Document():
     """A single document in the index"""
-    def __init__(self, vector, fields):
+    def __init__(self, vector):
         """
         Constructs a document
         :param vector: The termvector for the document
@@ -164,9 +164,9 @@ class Document():
         self.vector = vector
         self.id = vector.get('_id')
         self.terms = {}
-        self.generateTerms(fields)
+        self.generateTerms()
 
-    def generateTerms(self, fields):
+    def generateTerms(self):
         """Generates Terms for the terms in the specified fields"""
         for field in self.vector.get("term_vectors"):
             allTerms = self.vector.get("term_vectors").get(field).get("terms")
@@ -214,7 +214,6 @@ class Term():
         if isinstance(other, Term):
             return self.name == other.name and self.termFreq == other.termFreq and self.positions == other.positions
         return False
-
 
 class WordVector(Collection):
     """A word2vec model of the documents"""

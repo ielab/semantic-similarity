@@ -13,6 +13,7 @@ def fromFile(document, column1, column2, method, collection):
 
 
 def main():
+
     methods = {"1": CosineSimilarity, "2": PMI}
     print("Comparison Methods:")
     for key, value in methods.items():
