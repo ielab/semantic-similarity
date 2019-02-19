@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-
+import math
 import numpy as np
 from scipy import sparse
 from sklearn.metrics.pairwise import cosine_similarity
@@ -33,7 +33,7 @@ class CosineSimilarity(VecSim):
         array_sparse = sparse.csr_matrix(array)
         return cosine_similarity(array_sparse)[0][1]
 
-class PMI(Similarity):
+class PMI(WordSim):
     """Pointwise Mutual Information"""
     def __init__(self,  radius = None):
         """Constructor for PMI"""
@@ -41,9 +41,16 @@ class PMI(Similarity):
 
 
     def calculateSimilarity(self, D, f1, f2, f12):
-        """calculates similarity with the radius being the entire document"""
+        """
+        calculates the +PMI similarity
+        :param D: total number of documents/words
+        :param f1: number of occurrences of first word
+        :param f2: number of occurrences of second word
+        :param f12: number of common occurrences of the two words
+        :return: +PMI similarity
+        """
         try:
-            return max(0, math.log((f12 * D )/ (f1 * f2), 2))
+            return max(0, math.log((f12 / D )/ ((f1/D) * (f2/D)), 2))
         except:
             print("error: one of the words does not exist in index")
         #self.similarity = math.log(f12 / (f1 * (f2 / D) + (math.sqrt(f1 * 0.23))))
