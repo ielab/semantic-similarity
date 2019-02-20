@@ -3,7 +3,14 @@ from models import *
 
 
 def fromFile(document, column1, column2, method, collection):
-    """Compares pairs of words in a file"""
+    """
+    Compares pairs of words in a file and writes the similarity to similarity.txt
+    :param document: file with tab separated word pairs to be compared
+    :param column1: the column number that the words to compare are in. First column is 0
+    :param column2: column number for the word to compare to
+    :param method: the comparison method to use
+    :param collection: the collection to use
+    """
     filein = open(document, "r")
     fileout = open("similarity.txt", "w+")
     for line in filein:
