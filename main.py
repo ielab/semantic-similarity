@@ -33,28 +33,28 @@ def main():
             print(key + ": " + value.__name__)
         collectionNo = input("Enter number corresponding to desired collection: ")
         if collectionNo == '1':
-            link = input("Link to index: ")
+            link = input("URL of index: ")
             inputFields = input("Fields to use (space separated), leave blank for all: ")
             if inputFields == "":
                 fields = None
             else:
                 fields = inputFields.split(" ")
             ids = input("Ids to use (space separated), leave blank for all: ")
-            collection = Index(link + ":80", fields, ids)
+            collection = Index(link, fields, ids)
         elif collectionNo == '2':
             file = input("word2vec model to use (must be binary file): ")
             collection = WordVector(file)
         method = methods[methodNo]()
 
     if methodNo == '2':
-        link = input("Link to index: ")
+        link = input("URL of index: ")
         inputFields = input("Fields to use (space separated), leave blank for all: ")
         if inputFields == "":
             fields = None
         else:
             fields = inputFields.split(" ")
         ids = input("Ids to use (space separated), leave blank for all: ")
-        collection = Index(link + ":80", fields, ids)
+        collection = Index(link, fields, ids)
         radius = input("Radius to use (space separated), leave blank for all: ")
         method = methods[methodNo](int(radius))
     file = input("Document with word pairs: ")

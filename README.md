@@ -12,8 +12,8 @@ Instantiate the collection to be used, either from an elasticsearch index or wor
 The Index takes an url to the elasticsearch index, the fields to be used, and the ids to be used. All fields and ids are used if field and id are left blank.
 For example,
 ```
-index1 = Index('ielab:KVVjnWygjGJRQnYmgAd3CsWV@ielab-pubmed-index.uqcloud.net:80')
-index2 = Index('ielab:KVVjnWygjGJRQnYmgAd3CsWV@ielab-pubmed-index.uqcloud.net:80', ["title", "abstract"], ["1", "2", "134"])
+index1 = Index('localhost:9200')
+index2 = Index('localhost:9200', ["title", "abstract"], ["1", "2", "134"])
 ```
 
 The WordVector takes the filename of a binary file of a word2vec model. The file should be put in the same folder as the source code.
@@ -37,7 +37,7 @@ sim2 = PMI(10)
 Pass this into the similarity method as well as the two strings to compare when calling the similarity method.
 ```
 sim = CosineSimilarity()
-index = Index('ielab:KVVjnWygjGJRQnYmgAd3CsWV@ielab-pubmed-index.uqcloud.net:80')
+index = Index('localhost:9200')
 index.similarity(sim, "heart", "cardio")
 ```
 
